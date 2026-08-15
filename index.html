@@ -5,88 +5,270 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Science Skills Drag and Drop</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background-color: #f4f4f9;
+    :root {
+      --primary: #4f46e5;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-dark: #0f172a;
+      --text-muted: #64748b;
+      --success-bg: #dcfce7;
+      --success-text: #166534;
+      --border-color: #e2e8f0;
     }
-    .container {
-      display: flex;
-      justify-content: space-between;
-      gap: 20px;
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-dark);
+      margin: 0;
+      padding: 40px 20px;
+    }
+
+    .wrapper {
       max-width: 900px;
       margin: 0 auto;
     }
+
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1rem;
+      line-height: 1.5;
+      max-width: 750px;
+      margin: 0 auto;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 24px;
+    }
+
     .column {
-      flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 14px;
     }
+
+    .column-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
     .draggable {
-      padding: 12px;
-      background-color: #007bff;
+      padding: 16px 20px;
+      background: linear-gradient(135deg, #6366f1, var(--primary));
       color: white;
-      border-radius: 6px;
+      font-weight: 600;
+      font-size: 1rem;
+      border-radius: 12px;
       cursor: grab;
       user-select: none;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
+
+    .draggable:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px -2px rgba(79, 70, 229, 0.3);
+    }
+
     .dropzone {
-      padding: 12px;
-      min-height: 24px;
-      border: 2px dashed #ccc;
-      border-radius: 6px;
-      background-color: #fff;
+      padding: 16px;
+      min-height: 70px;
+      border: 2px dashed var(--border-color);
+      border-radius: 12px;
+      background-color: var(--card-bg);
       display: flex;
-      align-items: center;
-      transition: background-color 0.2s, border-color 0.2s;
+      flex-direction: column;
+      justify-content: center;
+      transition: all 0.2s ease;
     }
+
+    .dropzone-text {
+      font-size: 0.95rem;
+      color: var(--text-dark);
+      line-height: 1.4;
+    }
+
+    .dropzone-example {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-style: italic;
+    }
+
     .dropzone.hover {
-      background-color: #e9ecef;
-      border-color: #007bff;
+      border-color: var(--primary);
+      background-color: #eef2ff;
     }
+
     .dropzone.correct {
-      border-color: #28a745;
-      background-color: #d4edda;
+      border: 2px solid #22c55e;
+      background-color: var(--success-bg);
     }
+
+    .dropzone.correct .draggable {
+      background: #16a34a;
+      box-shadow: none;
+      width: 100%;
+    }
+
     #message {
       display: none;
-      margin-top: 20px;
-      padding: 15px;
-      background-color: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-      border-radius: 6px;
+      margin-top: 30px;
+      padding: 20px;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border-radius: 12px;
       text-align: center;
-      font-weight: bold;
+      font-size: 1.15rem;
+      font-weight: 700;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Action Cards Section */
+    .action-section {
+      margin-top: 48px;
+      border-top: 2px solid var(--border-color);
+      padding-top: 32px;
+    }
+
+    .action-section h2 {
+      text-align: center;
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+    }
+
+    .action-section p.intro {
+      text-align: center;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+    }
+
+    .action-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .action-card h3 {
+      margin-top: 0;
+      font-size: 1.1rem;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .action-card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin: 0;
     }
   </style>
 </head>
 <body>
 
-  <h1>Match the Science Skills</h1>
-  <p>Drag each skill on the left to its matching description on the right.</p>
+  <div class="wrapper">
+    <header>
+      <h1>🔬 Science Skills Roadmap</h1>
+      <p class="subtitle">
+        As you work through the puzzle below, pay attention to how these practices overlap. They aren't standalone topics for a single quiz; they are the exact roadmap we'll use in every activity this year!
+      </p>
+    </header>
 
-  <div class="container">
-    <div class="column" id="draggables-container">
-      <div class="draggable" id="skill1" draggable="true" data-match="desc1">Asking Questions</div>
-      <div class="draggable" id="skill2" draggable="true" data-match="desc2">Developing Models</div>
-      <div class="draggable" id="skill3" draggable="true" data-match="desc3">Planning Investigations</div>
-      <div class="draggable" id="skill4" draggable="true" data-match="desc4">Analyzing Data</div>
-      <div class="draggable" id="skill5" draggable="true" data-match="desc5">Using Mathematics</div>
+    <div class="container">
+      <div class="column" id="draggables-container">
+        <div class="column-title">Science Practices</div>
+        <div class="draggable" id="skill1" draggable="true" data-match="desc1">Asking Questions</div>
+        <div class="draggable" id="skill2" draggable="true" data-match="desc2">Developing Models</div>
+        <div class="draggable" id="skill3" draggable="true" data-match="desc3">Planning Investigations</div>
+        <div class="draggable" id="skill4" draggable="true" data-match="desc4">Analyzing Data</div>
+        <div class="draggable" id="skill5" draggable="true" data-match="desc5">Using Mathematics</div>
+      </div>
+
+      <div class="column" id="dropzones-container">
+        <div class="column-title">What It Means</div>
+        <div class="dropzone" data-match="desc1">
+          <div class="dropzone-text">Wondering "Why?" or "How?" about something you notice in the world.</div>
+          <div class="dropzone-example">💡 <i>Example: "Why do plant leaves turn yellow in the fall?"</i></div>
+        </div>
+        <div class="dropzone" data-match="desc2">
+          <div class="dropzone-text">Creating a visual, diagram, or 3D object to show how something works.</div>
+          <div class="dropzone-example">💡 <i>Example: Drawing a diagram of the water cycle.</i></div>
+        </div>
+        <div class="dropzone" data-match="desc3">
+          <div class="dropzone-text">Designing step-by-step experiments or tests to find answers.</div>
+          <div class="dropzone-example">💡 <i>Example: Testing which paper towel brand absorbs the most water.</i></div>
+        </div>
+        <div class="dropzone" data-match="desc4">
+          <div class="dropzone-text">Looking closely at lab results and measurements to spot patterns.</div>
+          <div class="dropzone-example">💡 <i>Example: Comparing plant growth charts across three weeks.</i></div>
+        </div>
+        <div class="dropzone" data-match="desc5">
+          <div class="dropzone-text">Using numbers, graphs, and calculations to express scientific facts.</div>
+          <div class="dropzone-example">💡 <i>Example: Calculating the average speed of a rolling toy car.</i></div>
+        </div>
+      </div>
     </div>
 
-    <div class="column" id="dropzones-container">
-      <div class="dropzone" data-match="desc1">Formulating queries about phenomena</div>
-      <div class="dropzone" data-match="desc2">Creating representations of system concepts</div>
-      <div class="dropzone" data-match="desc3">Designing systematic studies or procedures</div>
-      <div class="dropzone" data-match="desc4">Running hands-on labs & interpreting results</div>
-      <div class="dropzone" data-match="desc5">Making graphs & calculations</div>
-    </div>
+    <div id="message">🎉 Fantastic work! Scroll down to see how we'll put these skills into action this year.</div>
+
+    <!-- Action Cards Section -->
+    <section class="action-section">
+      <h2>Putting Science into Action</h2>
+      <p class="intro">Here is how we will use these practices throughout our course:</p>
+
+      <div class="cards-grid">
+        <div class="action-card">
+          <h3>❓ 1. Drive Our Labs</h3>
+          <p>Every unit starts with real questions. We'll design our own experiments to figure out the answers together.</p>
+        </div>
+
+        <div class="action-card">
+          <h3>🎨 2. Visualize Thinking</h3>
+          <p>We won't just memorize definitions; we'll draw and revise physical models as our understanding grows.</p>
+        </div>
+
+        <div class="action-card">
+          <h3>📊 3. Analyze Evidence</h3>
+          <p>Instead of taking textbook answers for granted, we'll collect evidence and calculate real data in every lab.</p>
+        </div>
+
+        <div class="action-card">
+          <h3>🔄 4. Connect the Dots</h3>
+          <p>Notice how asking a question leads to a model, which requires testing and math? You'll use all 5 skills in almost every unit!</p>
+        </div>
+      </div>
+    </section>
   </div>
-
-  <div id="message">Great job! All matches are correct!</div>
 
   <script>
     const draggables = document.querySelectorAll('.draggable');
@@ -97,7 +279,7 @@
       draggable.addEventListener('dragstart', (e) => {
         const target = e.currentTarget;
         e.dataTransfer.setData('text/plain', target.id);
-        setTimeout(() => target.style.opacity = '0.5', 0);
+        setTimeout(() => target.style.opacity = '0.4', 0);
       });
 
       draggable.addEventListener('dragend', (e) => {
@@ -128,7 +310,6 @@
           zone.classList.add('correct');
           draggedElement.setAttribute('draggable', 'false');
           draggedElement.style.cursor = 'default';
-          draggedElement.style.boxShadow = 'none';
 
           correctMatches++;
           if (correctMatches === 5) {
