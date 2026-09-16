@@ -98,30 +98,10 @@
 
     #map { flex: 1; height: 100%; }
 
-    /* Clean Leaflet Marker Container */
+    /* Remove standard leaflet pin backgrounds */
     .leaflet-div-icon {
       background: transparent !important;
       border: none !important;
-    }
-
-    /* HIGH-CONTRAST MAP BADGES */
-    .custom-pin-badge {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background-color: #111111;
-      padding: 6px 14px;
-      border-radius: 20px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.85);
-      white-space: nowrap;
-    }
-
-    .custom-pin-badge span.badge-title {
-      color: #ffffff !important;
-      font-weight: 800 !important;
-      font-size: 14px !important;
-      letter-spacing: 0.4px;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.8);
     }
   </style>
 </head>
@@ -145,7 +125,7 @@
   </script>
 
   <script>
-    // 10 Pride Locations with Vibrant Colors
+    // 10 Pride Locations with Bright Colors
     const prides = [
       { name: "Cameroon", lat: 8.1291, lng: 12.6226, color: "#ff4d4d" },       // Bright Red
       { name: "Tsavo", lat: -2.1833, lng: 38.4167, color: "#ffa500" },        // Bright Orange
@@ -186,20 +166,45 @@
       const btn = document.getElementById(`btn-${index}`);
 
       if (!markers[index]) {
-        // High-contrast badge with matching color border glow and enforced white text
+        // High-contrast badge with explicit inline styles to force readability over satellite tiles
         const badgeIcon = L.divIcon({
           className: '',
           html: `
-            <div class="custom-pin-badge" style="border: 2px solid ${pride.color}; box-shadow: 0 0 10px ${pride.color}aa;">
-              <span class="color-dot" style="background-color: ${pride.color}"></span>
-              <span class="badge-title">${pride.name}</span>
+            <div style="
+              display: flex; 
+              align-items: center; 
+              gap: 8px; 
+              background-color: #000000; 
+              padding: 6px 14px; 
+              border-radius: 20px; 
+              border: 3px solid ${pride.color}; 
+              box-shadow: 0 4px 12px rgba(0,0,0,0.9); 
+              white-space: nowrap;
+              width: fit-content;
+            ">
+              <span style="
+                width: 14px; 
+                height: 14px; 
+                border-radius: 50%; 
+                background-color: ${pride.color}; 
+                display: inline-block; 
+                border: 2px solid #ffffff;
+                flex-shrink: 0;
+              "></span>
+              <span style="
+                color: #ffffff !important; 
+                font-weight: 900 !important; 
+                font-size: 15px !important; 
+                font-family: Arial, sans-serif !important;
+                letter-spacing: 0.5px;
+                line-height: 1;
+              ">${pride.name}</span>
             </div>
           `,
-          iconAnchor: [40, 18]
+          iconAnchor: [50, 20]
         });
 
         const marker = L.marker([pride.lat, pride.lng], { icon: badgeIcon }).addTo(map);
-        marker.bindPopup(`<b>${pride.name} Pride</b><br>Lat: ${pride.lat}<br>Lng: ${pride.lng}`);
         markers[index] = marker;
 
         btn.textContent = "Plotted ✓";
