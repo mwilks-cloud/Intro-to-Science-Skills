@@ -14,9 +14,7 @@
   />
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       padding: 0;
@@ -27,7 +25,6 @@
       color: #333;
     }
 
-    /* Left Control Sidebar */
     #sidebar {
       width: 360px;
       padding: 20px;
@@ -68,26 +65,18 @@
       background: #f8f9fa;
       border: 1px solid #e2e8f0;
       border-radius: 6px;
-      transition: all 0.2s ease;
     }
 
-    .pride-card:hover {
-      border-color: #0076D6;
-      background: #edf2f7;
-    }
+    .pride-info { font-size: 0.85rem; }
+    .pride-info strong { display: flex; align-items: center; gap: 6px; color: #2d3748; }
+    .pride-info span { color: #718096; font-size: 0.78rem; }
 
-    .pride-info {
-      font-size: 0.85rem;
-    }
-
-    .pride-info strong {
-      display: block;
-      color: #2d3748;
-    }
-
-    .pride-info span {
-      color: #718096;
-      font-size: 0.78rem;
+    .color-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+      border: 1px solid rgba(0,0,0,0.2);
     }
 
     .btn-plot {
@@ -99,37 +88,37 @@
       cursor: pointer;
       font-size: 0.8rem;
       font-weight: bold;
-      transition: background 0.2s;
     }
 
-    .btn-plot:hover {
-      background-color: #0056b3;
-    }
+    .btn-plot.plotted { background-color: #28a745; }
+    #map { flex: 1; height: 100%; }
 
-    .btn-plot.plotted {
-      background-color: #28a745;
+    /* Custom Color Pin Styling */
+    .custom-pin {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 4px rgba(0,0,0,0.5);
     }
-
-    /* Right Map Container */
-    #map {
-      flex: 1;
-      height: 100%;
+    
+    .pride-tooltip {
+      font-weight: bold;
+      font-size: 12px;
+      padding: 2px 6px;
     }
   </style>
 </head>
 <body>
 
-  <!-- SIDEBAR CONTROLS -->
   <div id="sidebar">
     <h2>📍 Lion Pride Locations</h2>
     <p class="instructions">
-      Click <strong>Plot & Fly</strong> next to any pride coordinate to zoom directly into its satellite scenery and drop a marker pin on the map.
+      Click <strong>Plot & Fly</strong> next to any coordinate to drop its color-coded pin and fly to its satellite scenery.
     </p>
-
     <div class="coord-list" id="coordList"></div>
   </div>
 
-  <!-- LEAFLET MAP CONTAINER -->
   <div id="map"></div>
 
   <!-- Leaflet JS -->
@@ -140,32 +129,27 @@
   </script>
 
   <script>
-    // 10 Lion Pride Coordinates Data
+    // 10 Pride Locations with Unique Colors
     const prides = [
-      { name: "Cameroon", lat: 8.1291, lng: 12.6226 },
-      { name: "Tsavo", lat: -2.1833, lng: 38.4167 },
-      { name: "Fannie Roberts", lat: -26.5225, lng: 31.4659 },
-      { name: "Sabi Sands", lat: -24.7880, lng: 31.4914 },
-      { name: "Umfolozi", lat: -28.3430, lng: 31.9743 },
-      { name: "Zimbabwe", lat: -19.0154, lng: 29.1549 },
-      { name: "Zambia", lat: -13.1339, lng: 27.8493 },
-      { name: "Kalahari", lat: -25.5920, lng: 21.0937 },
-      { name: "Botswana", lat: -22.3285, lng: 24.6849 },
-      { name: "Etosha", lat: -18.8556, lng: 16.3293 }
+      { name: "Cameroon", lat: 8.1291, lng: 12.6226, color: "#e63946" },       // Red
+      { name: "Tsavo", lat: -2.1833, lng: 38.4167, color: "#f4a261" },        // Orange
+      { name: "Fannie Roberts", lat: -26.5225, lng: 31.4659, color: "#e76f51" }, // Coral
+      { name: "Sabi Sands", lat: -24.7880, lng: 31.4914, color: "#2a9d8f" },    // Teal
+      { name: "Umfolozi", lat: -28.3430, lng: 31.9743, color: "#264653" },     // Dark Cyan
+      { name: "Zimbabwe", lat: -19.0154, lng: 29.1549, color: "#9b5de5" },     // Purple
+      { name: "Zambia", lat: -13.1339, lng: 27.8493, color: "#f15bb5" },       // Pink
+      { name: "Kalahari", lat: -25.5920, lng: 21.0937, color: "#00bbf9" },     // Light Blue
+      { name: "Botswana", lat: -22.3285, lng: 24.6849, color: "#00f5d4" },     // Mint Green
+      { name: "Etosha", lat: -18.8556, lng: 16.3293, color: "#ffb703" }        // Gold
     ];
 
-    // Initialize Map Centered over Africa
     const map = L.map('map').setView([-5.0, 25.0], 4);
 
-    // Add High-Resolution Esri Satellite Imagery Layer
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+      attribution: 'Tiles &copy; Esri'
     }).addTo(map);
 
-    // Track active markers
     const markers = {};
-
-    // Render Sidebar Pride Buttons dynamically
     const coordContainer = document.getElementById('coordList');
 
     prides.forEach((pride, index) => {
@@ -173,7 +157,7 @@
       card.className = 'pride-card';
       card.innerHTML = `
         <div class="pride-info">
-          <strong>${index + 1}. ${pride.name}</strong>
+          <strong><span class="color-dot" style="background-color: ${pride.color}"></span> ${index + 1}. ${pride.name}</strong>
           <span>${pride.lat}, ${pride.lng}</span>
         </div>
         <button class="btn-plot" id="btn-${index}" onclick="plotPride(${index})">Plot & Fly</button>
@@ -181,25 +165,36 @@
       coordContainer.appendChild(card);
     });
 
-    // Function to handle plotting pins and smooth flying to coordinates
     function plotPride(index) {
       const pride = prides[index];
       const btn = document.getElementById(`btn-${index}`);
 
-      // If marker doesn't exist yet, add it
       if (!markers[index]) {
-        const marker = L.marker([pride.lat, pride.lng]).addTo(map);
-        marker.bindPopup(`<b>${pride.name} Pride</b><br>Lat: ${pride.lat}<br>Lng: ${pride.lng}`).openPopup();
+        // Create custom colored circle marker icon
+        const colorIcon = L.divIcon({
+          className: 'custom-icon',
+          html: `<div class="custom-pin" style="background-color: ${pride.color}"></div>`,
+          iconSize: [18, 18],
+          iconAnchor: [9, 9]
+        });
+
+        const marker = L.marker([pride.lat, pride.lng], { icon: colorIcon }).addTo(map);
+
+        // Add persistent name label on top of pin + click popup
+        marker.bindTooltip(`<b>${pride.name} Pride</b>`, { 
+          permanent: true, 
+          direction: 'top', 
+          className: 'pride-tooltip' 
+        });
+
+        marker.bindPopup(`<b>${pride.name} Pride</b><br>Lat: ${pride.lat}<br>Lng: ${pride.lng}`);
         markers[index] = marker;
 
         btn.textContent = "Plotted ✓";
         btn.classList.add("plotted");
       }
 
-      // Smoothly zoom/fly to coordinate
-      map.flyTo([pride.lat, pride.lng], 10, {
-        duration: 1.5
-      });
+      map.flyTo([pride.lat, pride.lng], 10, { duration: 1.5 });
     }
   </script>
 </body>
