@@ -91,7 +91,10 @@
       font-weight: bold;
     }
 
-    .btn-plot.plotted { background-color: #28a745; }
+    .btn-plot.plotted {
+      background-color: #28a745 !important;
+    }
+
     #map { flex: 1; height: 100%; }
 
     /* Custom Color Marker Badges on Map */
@@ -99,14 +102,15 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      background: white;
-      padding: 3px 8px;
+      background: #ffffff;
+      padding: 4px 10px;
       border-radius: 12px;
-      border: 2px solid #333;
+      border: 2px solid #333333;
       font-weight: bold;
-      font-size: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+      font-size: 13px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
       white-space: nowrap;
+      color: #111111;
     }
   </style>
 </head>
@@ -180,7 +184,7 @@
               <span>${pride.name}</span>
             </div>
           `,
-          iconAnchor: [40, 15]
+          iconAnchor: [30, 15]
         });
 
         const marker = L.marker([pride.lat, pride.lng], { icon: badgeIcon }).addTo(map);
