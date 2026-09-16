@@ -72,11 +72,12 @@
     .pride-info span { color: #718096; font-size: 0.78rem; }
 
     .color-dot {
-      width: 12px;
-      height: 12px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
       display: inline-block;
-      border: 1px solid rgba(0,0,0,0.2);
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 3px rgba(0,0,0,0.4);
     }
 
     .btn-plot {
@@ -93,19 +94,19 @@
     .btn-plot.plotted { background-color: #28a745; }
     #map { flex: 1; height: 100%; }
 
-    /* Custom Color Pin Styling */
-    .custom-pin {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      border: 2px solid #ffffff;
-      box-shadow: 0 0 4px rgba(0,0,0,0.5);
-    }
-    
-    .pride-tooltip {
+    /* Custom Color Marker Badges on Map */
+    .custom-pin-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: white;
+      padding: 3px 8px;
+      border-radius: 12px;
+      border: 2px solid #333;
       font-weight: bold;
       font-size: 12px;
-      padding: 2px 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+      white-space: nowrap;
     }
   </style>
 </head>
@@ -114,7 +115,7 @@
   <div id="sidebar">
     <h2>📍 Lion Pride Locations</h2>
     <p class="instructions">
-      Click <strong>Plot & Fly</strong> next to any coordinate to drop its color-coded pin and fly to its satellite scenery.
+      Click <strong>Plot & Fly</strong> next to any coordinate to drop its color-coded badge and fly to its satellite scenery.
     </p>
     <div class="coord-list" id="coordList"></div>
   </div>
@@ -129,7 +130,7 @@
   </script>
 
   <script>
-    // 10 Pride Locations with Unique Colors
+    // 10 Pride Locations with Unique High-Contrast Colors
     const prides = [
       { name: "Cameroon", lat: 8.1291, lng: 12.6226, color: "#e63946" },       // Red
       { name: "Tsavo", lat: -2.1833, lng: 38.4167, color: "#f4a261" },        // Orange
@@ -170,23 +171,19 @@
       const btn = document.getElementById(`btn-${index}`);
 
       if (!markers[index]) {
-        // Create custom colored circle marker icon
-        const colorIcon = L.divIcon({
-          className: 'custom-icon',
-          html: `<div class="custom-pin" style="background-color: ${pride.color}"></div>`,
-          iconSize: [18, 18],
-          iconAnchor: [9, 9]
+        // Create custom badge icon with color dot + text label
+        const badgeIcon = L.divIcon({
+          className: '',
+          html: `
+            <div class="custom-pin-badge">
+              <span class="color-dot" style="background-color: ${pride.color}"></span>
+              <span>${pride.name}</span>
+            </div>
+          `,
+          iconAnchor: [40, 15]
         });
 
-        const marker = L.marker([pride.lat, pride.lng], { icon: colorIcon }).addTo(map);
-
-        // Add persistent name label on top of pin + click popup
-        marker.bindTooltip(`<b>${pride.name} Pride</b>`, { 
-          permanent: true, 
-          direction: 'top', 
-          className: 'pride-tooltip' 
-        });
-
+        const marker = L.marker([pride.lat, pride.lng], { icon: badgeIcon }).addTo(map);
         marker.bindPopup(`<b>${pride.name} Pride</b><br>Lat: ${pride.lat}<br>Lng: ${pride.lng}`);
         markers[index] = marker;
 
