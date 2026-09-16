@@ -1,4 +1,189 @@
-<!-- OBSERVATIONS & NOTES PANEL -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lion Pride Geography Activity</title>
+
+  <!-- Leaflet CSS -->
+  <link 
+    rel="stylesheet" 
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+    crossorigin="" 
+  />
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background-color: #f4f6f8;
+      color: #333;
+    }
+
+    #app-container {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+    }
+
+    #sidebar {
+      width: 360px;
+      padding: 20px;
+      background: #ffffff;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: #1a252f;
+      border-bottom: 2px solid #0076D6;
+      padding-bottom: 8px;
+    }
+
+    .instructions {
+      font-size: 0.85rem;
+      color: #555;
+      line-height: 1.4;
+      margin-bottom: 15px;
+    }
+
+    .coord-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .pride-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px;
+      background: #f8f9fa;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+    }
+
+    .pride-info { font-size: 0.85rem; }
+    .pride-info strong { display: flex; align-items: center; gap: 6px; color: #2d3748; }
+    .pride-info span { color: #718096; font-size: 0.78rem; }
+
+    .color-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      display: inline-block;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 3px rgba(0,0,0,0.4);
+      flex-shrink: 0;
+    }
+
+    .btn-plot {
+      background-color: #0076D6;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    .btn-plot.plotted {
+      background-color: #28a745 !important;
+    }
+
+    #map { flex: 1; height: 100%; }
+
+    .leaflet-div-icon {
+      background: transparent !important;
+      border: none !important;
+    }
+
+    /* NOTES CONTAINER */
+    #notes-section {
+      background: #ffffff;
+      padding: 20px;
+      border-top: 2px solid #e2e8f0;
+      box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+      z-index: 1001;
+    }
+
+    .notes-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .notes-header h3 {
+      margin: 0;
+      color: #2d3748;
+      font-size: 1.05rem;
+    }
+
+    .notes-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .note-box label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: #1a252f;
+      margin-bottom: 6px;
+    }
+
+    .note-box textarea {
+      width: 100%;
+      height: 75px;
+      border: 1px solid #cbd5e0;
+      border-radius: 6px;
+      padding: 8px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      resize: vertical;
+    }
+
+    .btn-download {
+      background-color: #0076D6;
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="app-container">
+    <div id="sidebar">
+      <h2>📍 Lion Pride Locations</h2>
+      <p class="instructions">
+        Click <strong>Plot & Fly</strong> next to any coordinate to drop its color-coded badge and fly to its satellite scenery.
+      </p>
+      <div class="coord-list" id="coordList"></div>
+    </div>
+
+    <div id="map"></div>
+  </div>
+
+  <!-- OBSERVATIONS & NOTES PANEL -->
   <div id="notes-section">
     <div class="notes-header">
       <h3>📝 OBSERVATIONS &amp; NOTES</h3>
@@ -22,3 +207,135 @@
       <span style="font-size: 0.8rem; color: #718096; font-style: italic;">(Optional — for keeping a personal copy)</span>
     </div>
   </div>
+
+  <!-- Leaflet JS -->
+  <script 
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
+    crossorigin="">
+  </script>
+
+  <script>
+    const prides = [
+      { name: "Cameroon", lat: 8.1291, lng: 12.6226, color: "#ff4d4d" },
+      { name: "Tsavo", lat: -2.1833, lng: 38.4167, color: "#ffa500" },
+      { name: "Fannie Roberts", lat: -26.5225, lng: 31.4659, color: "#ff7f50" },
+      { name: "Sabi Sands", lat: -24.7880, lng: 31.4914, color: "#00e676" },
+      { name: "Umfolozi", lat: -28.3430, lng: 31.9743, color: "#00bcd4" },
+      { name: "Zimbabwe", lat: -19.0154, lng: 29.1549, color: "#d870dd" },
+      { name: "Zambia", lat: -13.1339, lng: 27.8493, color: "#ff66cc" },
+      { name: "Kalahari", lat: -25.5920, lng: 21.0937, color: "#00bfff" },
+      { name: "Botswana", lat: -22.3285, lng: 24.6849, color: "#1de9b6" },
+      { name: "Etosha", lat: -18.8556, lng: 16.3293, color: "#ffd700" }
+    ];
+
+    const map = L.map('map').setView([-5.0, 25.0], 4);
+
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Tiles &copy; Esri'
+    }).addTo(map);
+
+    const markers = {};
+    const coordContainer = document.getElementById('coordList');
+
+    prides.forEach((pride, index) => {
+      const card = document.createElement('div');
+      card.className = 'pride-card';
+      card.innerHTML = `
+        <div class="pride-info">
+          <strong><span class="color-dot" style="background-color: ${pride.color}"></span> ${index + 1}. ${pride.name}</strong>
+          <span>${pride.lat}, ${pride.lng}</span>
+        </div>
+        <button class="btn-plot" id="btn-${index}" onclick="plotPride(${index})">Plot & Fly</button>
+      `;
+      coordContainer.appendChild(card);
+    });
+
+    function plotPride(index) {
+      const pride = prides[index];
+      const btn = document.getElementById(`btn-${index}`);
+
+      if (!markers[index]) {
+        const badgeIcon = L.divIcon({
+          className: '',
+          html: `
+            <div style="
+              display: flex; 
+              align-items: center; 
+              gap: 8px; 
+              background-color: #000000; 
+              padding: 6px 14px; 
+              border-radius: 20px; 
+              border: 3px solid ${pride.color}; 
+              box-shadow: 0 4px 12px rgba(0,0,0,0.9); 
+              white-space: nowrap;
+              width: fit-content;
+            ">
+              <span style="
+                width: 14px; 
+                height: 14px; 
+                border-radius: 50%; 
+                background-color: ${pride.color}; 
+                display: inline-block; 
+                border: 2px solid #ffffff;
+                flex-shrink: 0;
+              "></span>
+              <span style="
+                color: #ffffff !important; 
+                font-weight: 900 !important; 
+                font-size: 15px !important; 
+                font-family: Arial, sans-serif !important;
+                letter-spacing: 0.5px;
+                line-height: 1;
+              ">${pride.name}</span>
+            </div>
+          `,
+          iconAnchor: [50, 20]
+        });
+
+        const marker = L.marker([pride.lat, pride.lng], { icon: badgeIcon }).addTo(map);
+        markers[index] = marker;
+
+        btn.textContent = "Plotted ✓";
+        btn.classList.add("plotted");
+      }
+
+      map.flyTo([pride.lat, pride.lng], 10, { duration: 1.5 });
+    }
+
+    /* BROWSER LOCALSTORAGE FOR NOTES */
+    document.addEventListener("DOMContentLoaded", function() {
+      ['lion_q1', 'lion_q2'].forEach(id => {
+        const savedText = localStorage.getItem(id);
+        if (savedText) {
+          const el = document.getElementById(id);
+          if (el) el.value = savedText;
+        }
+      });
+    });
+
+    function saveNote(id) {
+      const text = document.getElementById(id).value;
+      localStorage.setItem(id, text);
+      
+      const status = document.getElementById('saveStatus');
+      if (status) {
+        status.style.opacity = '1';
+        setTimeout(() => { status.style.opacity = '0'; }, 1500);
+      }
+    }
+
+    function downloadNotes() {
+      const q1 = document.getElementById('lion_q1').value;
+      const q2 = document.getElementById('lion_q2').value;
+      const content = `LION PRIDE GEOGRAPHY OBSERVATIONS\n\n1. Which populations are closely related?\n${q1}\n\n2. Explanation:\n${q2}`;
+      
+      const blob = new Blob([content], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Lion_Pride_Observations.txt';
+      a.click();
+    }
+  </script>
+</body>
+</html>
