@@ -104,19 +104,20 @@
       border: none !important;
     }
 
+    /* HIGH-CONTRAST MAP BADGES */
     .custom-pin-badge {
       display: flex;
       align-items: center;
-      gap: 6px;
-      background: #ffffff;
-      padding: 4px 10px;
-      border-radius: 12px;
-      border: 2px solid #333333;
-      font-weight: bold;
-      font-size: 13px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+      gap: 8px;
+      background: #111111;
+      color: #ffffff;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-weight: 800;
+      font-size: 14px;
+      letter-spacing: 0.3px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.75);
       white-space: nowrap;
-      color: #111111;
     }
   </style>
 </head>
@@ -140,18 +141,18 @@
   </script>
 
   <script>
-    // 10 Pride Locations with Matching Colors
+    // 10 Pride Locations with Vibrant Colors
     const prides = [
-      { name: "Cameroon", lat: 8.1291, lng: 12.6226, color: "#e63946" },       // Red
-      { name: "Tsavo", lat: -2.1833, lng: 38.4167, color: "#f4a261" },        // Orange
-      { name: "Fannie Roberts", lat: -26.5225, lng: 31.4659, color: "#e76f51" }, // Coral
-      { name: "Sabi Sands", lat: -24.7880, lng: 31.4914, color: "#2a9d8f" },    // Teal
-      { name: "Umfolozi", lat: -28.3430, lng: 31.9743, color: "#264653" },     // Dark Cyan
-      { name: "Zimbabwe", lat: -19.0154, lng: 29.1549, color: "#9b5de5" },     // Purple
-      { name: "Zambia", lat: -13.1339, lng: 27.8493, color: "#f15bb5" },       // Pink
-      { name: "Kalahari", lat: -25.5920, lng: 21.0937, color: "#00bbf9" },     // Light Blue
-      { name: "Botswana", lat: -22.3285, lng: 24.6849, color: "#00f5d4" },     // Mint Green
-      { name: "Etosha", lat: -18.8556, lng: 16.3293, color: "#ffb703" }        // Gold
+      { name: "Cameroon", lat: 8.1291, lng: 12.6226, color: "#ff4d4d" },       // Bright Red
+      { name: "Tsavo", lat: -2.1833, lng: 38.4167, color: "#ffa500" },        // Bright Orange
+      { name: "Fannie Roberts", lat: -26.5225, lng: 31.4659, color: "#ff7f50" }, // Coral
+      { name: "Sabi Sands", lat: -24.7880, lng: 31.4914, color: "#00e676" },    // Neon Green
+      { name: "Umfolozi", lat: -28.3430, lng: 31.9743, color: "#00bcd4" },     // Cyan
+      { name: "Zimbabwe", lat: -19.0154, lng: 29.1549, color: "#d870dd" },     // Purple
+      { name: "Zambia", lat: -13.1339, lng: 27.8493, color: "#ff66cc" },       // Pink
+      { name: "Kalahari", lat: -25.5920, lng: 21.0937, color: "#00bfff" },     // Deep Sky Blue
+      { name: "Botswana", lat: -22.3285, lng: 24.6849, color: "#1de9b6" },     // Bright Mint
+      { name: "Etosha", lat: -18.8556, lng: 16.3293, color: "#ffd700" }        // Gold
     ];
 
     const map = L.map('map').setView([-5.0, 25.0], 4);
@@ -181,16 +182,16 @@
       const btn = document.getElementById(`btn-${index}`);
 
       if (!markers[index]) {
-        // Create custom badge icon matching the exact sidebar dot color
+        // High-contrast badge with matching color border glow
         const badgeIcon = L.divIcon({
           className: '',
           html: `
-            <div class="custom-pin-badge">
+            <div class="custom-pin-badge" style="border: 2px solid ${pride.color}; box-shadow: 0 0 10px ${pride.color}aa;">
               <span class="color-dot" style="background-color: ${pride.color}"></span>
               <span>${pride.name}</span>
             </div>
           `,
-          iconAnchor: [30, 15]
+          iconAnchor: [40, 18]
         });
 
         const marker = L.marker([pride.lat, pride.lng], { icon: badgeIcon }).addTo(map);
