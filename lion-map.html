@@ -78,6 +78,7 @@
       display: inline-block;
       border: 2px solid #ffffff;
       box-shadow: 0 0 3px rgba(0,0,0,0.4);
+      flex-shrink: 0;
     }
 
     .btn-plot {
@@ -97,7 +98,12 @@
 
     #map { flex: 1; height: 100%; }
 
-    /* Custom Color Marker Badges on Map */
+    /* Clean Leaflet Marker Badge Styling */
+    .leaflet-div-icon {
+      background: transparent !important;
+      border: none !important;
+    }
+
     .custom-pin-badge {
       display: flex;
       align-items: center;
@@ -134,7 +140,7 @@
   </script>
 
   <script>
-    // 10 Pride Locations with Unique High-Contrast Colors
+    // 10 Pride Locations with Matching Colors
     const prides = [
       { name: "Cameroon", lat: 8.1291, lng: 12.6226, color: "#e63946" },       // Red
       { name: "Tsavo", lat: -2.1833, lng: 38.4167, color: "#f4a261" },        // Orange
@@ -175,7 +181,7 @@
       const btn = document.getElementById(`btn-${index}`);
 
       if (!markers[index]) {
-        // Create custom badge icon with color dot + text label
+        // Create custom badge icon matching the exact sidebar dot color
         const badgeIcon = L.divIcon({
           className: '',
           html: `
