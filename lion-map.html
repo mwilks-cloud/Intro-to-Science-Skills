@@ -98,7 +98,7 @@
 
     #map { flex: 1; height: 100%; }
 
-    /* Clean Leaflet Marker Badge Styling */
+    /* Clean Leaflet Marker Container */
     .leaflet-div-icon {
       background: transparent !important;
       border: none !important;
@@ -109,15 +109,19 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      background: #111111;
-      color: #ffffff;
-      padding: 5px 12px;
+      background-color: #111111;
+      padding: 6px 14px;
       border-radius: 20px;
-      font-weight: 800;
-      font-size: 14px;
-      letter-spacing: 0.3px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.75);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.85);
       white-space: nowrap;
+    }
+
+    .custom-pin-badge span.badge-title {
+      color: #ffffff !important;
+      font-weight: 800 !important;
+      font-size: 14px !important;
+      letter-spacing: 0.4px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.8);
     }
   </style>
 </head>
@@ -182,13 +186,13 @@
       const btn = document.getElementById(`btn-${index}`);
 
       if (!markers[index]) {
-        // High-contrast badge with matching color border glow
+        // High-contrast badge with matching color border glow and enforced white text
         const badgeIcon = L.divIcon({
           className: '',
           html: `
             <div class="custom-pin-badge" style="border: 2px solid ${pride.color}; box-shadow: 0 0 10px ${pride.color}aa;">
               <span class="color-dot" style="background-color: ${pride.color}"></span>
-              <span>${pride.name}</span>
+              <span class="badge-title">${pride.name}</span>
             </div>
           `,
           iconAnchor: [40, 18]
