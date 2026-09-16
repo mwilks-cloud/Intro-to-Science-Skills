@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lion Pride Geography Activity</title>
+
+  <!-- Leaflet CSS -->
+  <link 
+    rel="stylesheet" 
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+    crossorigin="" 
+  />
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      height: 100vh;
+      background-color: #f4f6f8;
+      color: #333;
+    }
+
+    /* Left Control Sidebar */
+    #sidebar {
+      width: 360px;
+      padding: 20px;
+      background: #ffffff;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: #1a252f;
+      border-bottom: 2px solid #0076D6;
+      padding-bottom: 8px;
+    }
+
+    .instructions {
+      font-size: 0.85rem;
+      color: #555;
+      line-height: 1.4;
+      margin-bottom: 15px;
+    }
+
+    .coord-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .pride-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px;
+      background: #f8f9fa;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .pride-card:hover {
+      border-color: #0076D6;
+      background: #edf2f7;
+    }
+
+    .pride-info {
+      font-size: 0.85rem;
+    }
+
+    .pride-info strong {
+      display: block;
+      color: #2d3748;
+    }
+
+    .pride-info span {
+      color: #718096;
+      font-size: 0.78rem;
+    }
+
+    .btn-plot {
+      background-color: #0076D6;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+
+    .btn-plot:hover {
+      background-color: #0056b3;
+    }
+
+    .btn-plot.plotted {
+      background-color: #28a745;
+    }
+
+    /* Right Map Container */
+    #map {
+      flex: 1;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR CONTROLS -->
+  <div id="sidebar">
+    <h2>📍 Lion Pride Locations</h2>
+    <p class="instructions">
+      Click <strong>Plot & Fly</strong> next to any pride coordinate to zoom directly into its satellite scenery and drop a marker pin on the map.
+    </p>
+
+    <div class="coord-list" id="coordList"></div>
+  </div>
+
+  <!-- LEAFLET MAP CONTAINER -->
+  <div id="map"></div>
+
+  <!-- Leaflet JS -->
+  <script 
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
+    crossorigin="">
+  </script>
+
+  <script>
+    // 10 Lion Pride Coordinates Data
+    const prides = [
+      { name: "Cameroon", lat: 8.1291, lng: 12.6226 },
+      { name: "Tsavo", lat: -2.1833, lng: 38.4167 },
+      { name: "Fannie Roberts", lat: -26.5225, lng: 31.4659 },
+      { name: "Sabi Sands", lat: -24.7880, lng: 31.4914 },
+      { name: "Umfolozi", lat: -28.3430, lng: 31.9743 },
+      { name: "Zimbabwe", lat: -19.0154, lng: 29.1549 },
+      { name: "Zambia", lat: -13.1339, lng: 27.8493 },
+      { name: "Kalahari", lat: -25.5920, lng: 21.0937 },
+      { name: "Botswana", lat: -22.3285, lng: 24.6849 },
+      { name: "Etosha", lat: -18.8556, lng: 16.3293 }
+    ];
+
+    // Initialize Map Centered over Africa
+    const map = L.map('map').setView([-5.0, 25.0], 4);
+
+    // Add High-Resolution Esri Satellite Imagery Layer
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+    }).addTo(map);
+
+    // Track active markers
+    const markers = {};
+
+    // Render Sidebar Pride Buttons dynamically
+    const coordContainer = document.getElementById('coordList');
+
+    prides.forEach((pride, index) => {
+      const card = document.createElement('div');
+      card.className = 'pride-card';
+      card.innerHTML = `
+        <div class="pride-info">
+          <strong>${index + 1}. ${pride.name}</strong>
+          <span>${pride.lat}, ${pride.lng}</span>
+        </div>
+        <button class="btn-plot" id="btn-${index}" onclick="plotPride(${index})">Plot & Fly</button>
+      `;
+      coordContainer.appendChild(card);
+    });
+
+    // Function to handle plotting pins and smooth flying to coordinates
+    function plotPride(index) {
+      const pride = prides[index];
+      const btn = document.getElementById(`btn-${index}`);
+
+      // If marker doesn't exist yet, add it
+      if (!markers[index]) {
+        const marker = L.marker([pride.lat, pride.lng]).addTo(map);
+        marker.bindPopup(`<b>${pride.name} Pride</b><br>Lat: ${pride.lat}<br>Lng: ${pride.lng}`).openPopup();
+        markers[index] = marker;
+
+        btn.textContent = "Plotted ✓";
+        btn.classList.add("plotted");
+      }
+
+      // Smoothly zoom/fly to coordinate
+      map.flyTo([pride.lat, pride.lng], 10, {
+        duration: 1.5
+      });
+    }
+  </script>
+</body>
+</html>
