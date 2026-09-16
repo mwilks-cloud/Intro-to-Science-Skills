@@ -20,9 +20,16 @@
       padding: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       display: flex;
+      flex-direction: column;
       height: 100vh;
       background-color: #f4f6f8;
       color: #333;
+    }
+
+    #app-container {
+      display: flex;
+      flex: 1;
+      min-height: 0;
     }
 
     #sidebar {
@@ -98,24 +105,106 @@
 
     #map { flex: 1; height: 100%; }
 
-    /* Remove standard leaflet pin backgrounds */
     .leaflet-div-icon {
       background: transparent !important;
       border: none !important;
+    }
+
+    /* NOTES CONTAINER */
+    #notes-section {
+      background: #ffffff;
+      padding: 20px;
+      border-top: 2px solid #e2e8f0;
+      box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+      z-index: 1001;
+    }
+
+    .notes-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .notes-header h3 {
+      margin: 0;
+      color: #2d3748;
+      font-size: 1.05rem;
+    }
+
+    .notes-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .note-box label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: #1a252f;
+      margin-bottom: 6px;
+    }
+
+    .note-box textarea {
+      width: 100%;
+      height: 75px;
+      border: 1px solid #cbd5e0;
+      border-radius: 6px;
+      padding: 8px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      resize: vertical;
+    }
+
+    .btn-download {
+      background-color: #0076D6;
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.8rem;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
 
-  <div id="sidebar">
-    <h2>📍 Lion Pride Locations</h2>
-    <p class="instructions">
-      Click <strong>Plot & Fly</strong> next to any coordinate to drop its color-coded badge and fly to its satellite scenery.
-    </p>
-    <div class="coord-list" id="coordList"></div>
+  <div id="app-container">
+    <div id="sidebar">
+      <h2>📍 Lion Pride Locations</h2>
+      <p class="instructions">
+        Click <strong>Plot & Fly</strong> next to any coordinate to drop its color-coded badge and fly to its satellite scenery.
+      </p>
+      <div class="coord-list" id="coordList"></div>
+    </div>
+
+    <div id="map"></div>
   </div>
 
-  <div id="map"></div>
+  <!-- OBSERVATIONS & NOTES PANEL -->
+  <div id="notes-section">
+    <div class="notes-header">
+      <h3>📝 OBSERVATIONS &amp; NOTES</h3>
+      <span id="saveStatus" style="font-size: 0.8rem; color: #28a745; font-weight: bold; opacity: 0; transition: opacity 0.3s;">Saved to browser ✓</span>
+    </div>
+
+    <div class="notes-grid">
+      <div class="note-box">
+        <label for="lion_q1">1. Which populations would you predict are more closely related to one another?</label>
+        <textarea id="lion_q1" placeholder="Type observations here... (auto-saved)" oninput="saveNote('lion_q1')"></textarea>
+      </div>
+
+      <div class="note-box">
+        <label for="lion_q2">2. Explain why you answered the previous question the way you did.</label>
+        <textarea id="lion_q2" placeholder="Type explanation here... (auto-saved)" oninput="saveNote('lion_q2')"></textarea>
+      </div>
+    </div>
+
+    <button type="button" class="btn-download" onclick="downloadNotes()">📥 Download Notes (.txt)</button>
+  </div>
 
   <!-- Leaflet JS -->
   <script 
@@ -125,18 +214,17 @@
   </script>
 
   <script>
-    // 10 Pride Locations with Bright Colors
     const prides = [
-      { name: "Cameroon", lat: 8.1291, lng: 12.6226, color: "#ff4d4d" },       // Bright Red
-      { name: "Tsavo", lat: -2.1833, lng: 38.4167, color: "#ffa500" },        // Bright Orange
-      { name: "Fannie Roberts", lat: -26.5225, lng: 31.4659, color: "#ff7f50" }, // Coral
-      { name: "Sabi Sands", lat: -24.7880, lng: 31.4914, color: "#00e676" },    // Neon Green
-      { name: "Umfolozi", lat: -28.3430, lng: 31.9743, color: "#00bcd4" },     // Cyan
-      { name: "Zimbabwe", lat: -19.0154, lng: 29.1549, color: "#d870dd" },     // Purple
-      { name: "Zambia", lat: -13.1339, lng: 27.8493, color: "#ff66cc" },       // Pink
-      { name: "Kalahari", lat: -25.5920, lng: 21.0937, color: "#00bfff" },     // Deep Sky Blue
-      { name: "Botswana", lat: -22.3285, lng: 24.6849, color: "#1de9b6" },     // Bright Mint
-      { name: "Etosha", lat: -18.8556, lng: 16.3293, color: "#ffd700" }        // Gold
+      { name: "Cameroon", lat: 8.1291, lng: 12.6226, color: "#ff4d4d" },
+      { name: "Tsavo", lat: -2.1833, lng: 38.4167, color: "#ffa500" },
+      { name: "Fannie Roberts", lat: -26.5225, lng: 31.4659, color: "#ff7f50" },
+      { name: "Sabi Sands", lat: -24.7880, lng: 31.4914, color: "#00e676" },
+      { name: "Umfolozi", lat: -28.3430, lng: 31.9743, color: "#00bcd4" },
+      { name: "Zimbabwe", lat: -19.0154, lng: 29.1549, color: "#d870dd" },
+      { name: "Zambia", lat: -13.1339, lng: 27.8493, color: "#ff66cc" },
+      { name: "Kalahari", lat: -25.5920, lng: 21.0937, color: "#00bfff" },
+      { name: "Botswana", lat: -22.3285, lng: 24.6849, color: "#1de9b6" },
+      { name: "Etosha", lat: -18.8556, lng: 16.3293, color: "#ffd700" }
     ];
 
     const map = L.map('map').setView([-5.0, 25.0], 4);
@@ -166,7 +254,6 @@
       const btn = document.getElementById(`btn-${index}`);
 
       if (!markers[index]) {
-        // High-contrast badge with explicit inline styles to force readability over satellite tiles
         const badgeIcon = L.divIcon({
           className: '',
           html: `
@@ -212,6 +299,40 @@
       }
 
       map.flyTo([pride.lat, pride.lng], 10, { duration: 1.5 });
+    }
+
+    /* BROWSER LOCALSTORAGE FOR NOTES */
+    document.addEventListener("DOMContentLoaded", function() {
+      ['lion_q1', 'lion_q2'].forEach(id => {
+        const savedText = localStorage.getItem(id);
+        if (savedText) {
+          const el = document.getElementById(id);
+          if (el) el.value = savedText;
+        }
+      });
+    });
+
+    function saveNote(id) {
+      const text = document.getElementById(id).value;
+      localStorage.setItem(id, text);
+      
+      const status = document.getElementById('saveStatus');
+      if (status) {
+        status.style.opacity = '1';
+        setTimeout(() => { status.style.opacity = '0'; }, 1500);
+      }
+    }
+
+    function downloadNotes() {
+      const q1 = document.getElementById('lion_q1').value;
+      const q2 = document.getElementById('lion_q2').value;
+      const content = `LION PRIDE GEOGRAPHY OBSERVATIONS\n\n1. Which populations are closely related?\n${q1}\n\n2. Explanation:\n${q2}`;
+      
+      const blob = new Blob([content], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Lion_Pride_Observations.txt';
+      a.click();
     }
   </script>
 </body>
